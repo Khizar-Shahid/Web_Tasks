@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Task 3 - Navbar Theme</title>
+<style>
+:root {
+  --bg: #0b1120;
+  --bg-alt: #020617;
+  --text: #e5e7eb;
+  --muted: #9ca3af;
+  --accent: #38bdf8;
+  --accent-soft: rgba(56, 189, 248, 0.14);
+  --accent-strong: #0ea5e9;
+  --card: rgba(15, 23, 42, 0.85);
+  --border-subtle: rgba(148, 163, 184, 0.4);
+}
+
+.light {
+  --bg: #f3f4f6;
+  --bg-alt: #e5e7eb;
+  --text: #111827;
+  --muted: #4b5563;
+  --accent: #2563eb;
+  --accent-soft: rgba(37, 99, 235, 0.12);
+  --accent-strong: #1d4ed8;
+  --card: #ffffff;
+  --border-subtle: rgba(148, 163, 184, 0.6);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(56, 189, 248, 0.18), transparent 55%),
+    radial-gradient(circle at 100% 100%, rgba(168, 85, 247, 0.22), transparent 55%),
+    var(--bg);
+  color: var(--text);
+  transition: background 0.35s ease, color 0.35s ease;
+}
+
+header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 24px;
+  background: linear-gradient(to bottom, rgba(15, 23, 42, 0.98), rgba(15, 23, 42, 0.88));
+  border-bottom: 1px solid rgba(148, 163, 184, 0.35);
+  backdrop-filter: blur(14px);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 0.92rem;
+}
+
+.brand-logo {
+  width: 28px;
+  height: 28px;
+  border-radius: 10px;
+  background: conic-gradient(from 150deg, #38bdf8, #6366f1, #a855f7, #ec4899, #38bdf8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #0b1120;
+  font-size: 0.75rem;
+  box-shadow: 0 10px 25px rgba(56, 189, 248, 0.7);
+}
+
+nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+}
+
+nav a {
+  position: relative;
+  padding: 6px 10px;
+  color: #e5e7eb;
+  text-decoration: none;
+  border-radius: 999px;
+  transition: color 0.2s ease, background 0.2s ease, transform 0.15s ease;
+}
+
+nav a::after {
+  content: "";
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 3px;
+  height: 2px;
+  border-radius: 999px;
+  background: linear-gradient(to right, #38bdf8, #6366f1);
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+nav a:hover {
+  color: var(--accent-strong);
+  background: rgba(15, 23, 42, 0.7);
+  transform: translateY(-1px);
+}
+
+nav a:hover::after {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.menu {
+  display: none;
+  cursor: pointer;
+  font-size: 1.4rem;
+  padding: 6px 10px;
+  border-radius: 999px;
+  color: #e5e7eb;
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+
+.menu:hover {
+  background: rgba(15, 23, 42, 0.9);
+  transform: translateY(-1px);
+}
+
+.theme-btn {
+  border: none;
+  border-radius: 999px;
+  padding: 6px 11px;
+  background: radial-gradient(circle at 0% 0%, #facc15, #fb7185);
+  color: #020617;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  box-shadow: 0 10px 25px rgba(248, 250, 252, 0.18);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+}
+
+.theme-btn span {
+  font-size: 1.1rem;
+}
+
+.theme-btn:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.08);
+  box-shadow: 0 14px 35px rgba(15, 23, 42, 0.95);
+}
+
+.theme-btn:active {
+  transform: translateY(1px) scale(0.97);
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 1);
+}
+
+.hero {
+  max-width: 960px;
+  margin: 40px auto 0;
+  padding: 32px 24px 56px;
+}
+
+.hero-inner {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1.2fr);
+  gap: 32px;
+  align-items: center;
+}
+
+.hero-text h1 {
+  font-size: clamp(2rem, 3vw, 2.6rem);
+  margin: 0 0 10px;
+  letter-spacing: 0.02em;
+}
+
+.hero-text p {
+  margin: 0 0 18px;
+  color: var(--muted);
+  max-width: 460px;
+}
+
+.hero-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 11px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  border: 1px solid var(--border-subtle);
+  margin-bottom: 10px;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.hero-pill-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: #22c55e;
+  box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.22);
+}
+
+.hero-card {
+  background: var(--card);
+  border-radius: 18px;
+  padding: 18px 18px 16px;
+  border: 1px solid var(--border-subtle);
+  box-shadow: 0 25px 55px rgba(15, 23, 42, 0.75);
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-card::before {
+  content: "";
+  position: absolute;
+  inset: -40%;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(56, 189, 248, 0.3), transparent 65%),
+    radial-gradient(circle at 100% 100%, rgba(14, 165, 233, 0.3), transparent 60%);
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.hero-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  position: relative;
+  z-index: 1;
+}
+
+.hero-card-title {
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: #cbd5f5;
+}
+
+.theme-indicator {
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(148, 163, 184, 0.6);
+  font-size: 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.theme-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--accent);
+}
+
+.hero-card-body {
+  position: relative;
+  z-index: 1;
+  font-size: 0.83rem;
+  color: #e5e7eb;
+}
+
+.hero-card-body p {
+  margin: 4px 0;
+}
+
+.hero-card-body span.label {
+  color: #a5b4fc;
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  header {
+    padding-inline: 16px;
+  }
+
+  nav {
+    display: none;
+    position: absolute;
+    top: 52px;
+    right: 16px;
+    left: 16px;
+    flex-direction: column;
+    padding: 10px;
+    background: rgba(15, 23, 42, 0.98);
+    border-radius: 14px;
+    border: 1px solid rgba(148, 163, 184, 0.4);
+    box-shadow: 0 20px 40px rgba(15, 23, 42, 0.95);
+  }
+
+  nav a {
+    padding: 7px 10px;
+  }
+
+  .menu {
+    display: inline-flex;
+  }
+
+  .hero {
+    margin-top: 28px;
+    padding-inline: 16px;
+  }
+
+  .hero-inner {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+</style>
+</head>
+
+<body class="light">
+<header>
+  <div class="brand">
+    <div class="brand-logo">M</div>
+    <span>MySite</span>
+  </div>
+  <nav id="nav">
+    <a href="#">Home</a>
+    <a href="#">About</a>
+    <a href="#">Services</a>
+    <a href="#">Contact</a>
+  </nav>
+  <div class="nav-actions">
+    <span class="menu" onclick="toggleMenu()">☰</span>
+    <button class="theme-btn" id="themeBtn" onclick="toggleTheme()">
+      <span id="themeIcon">🌞</span>
+      Theme
+    </button>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-text">
+      <div class="hero-pill">
+        <span class="hero-pill-dot"></span>
+        Live preview
+      </div>
+      <h1>Responsive navbar with smooth theme toggle.</h1>
+      <p>Resize the window, open the menu, and switch between light and dark modes to see how the layout and colors adapt.</p>
+    </div>
+    <div class="hero-card">
+      <div class="hero-card-header">
+        <div class="hero-card-title">Current Theme</div>
+        <div class="theme-indicator">
+          <span class="theme-dot"></span>
+          <span id="themeLabel">Light</span>
+        </div>
+      </div>
+      <div class="hero-card-body">
+        <p><span class="label">Background:</span> Driven by CSS variables.</p>
+        <p><span class="label">Navbar:</span> Sticky, glassy, and responsive.</p>
+        <p><span class="label">Menu:</span> Collapses into an icon on mobile.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+function toggleMenu() {
+  const nav = document.getElementById("nav");
+  const isOpen = nav.style.display === "flex" || nav.style.display === "";
+  nav.style.display = isOpen ? "none" : "flex";
+}
+
+function toggleTheme() {
+  const body = document.body;
+  const themeBtn = document.getElementById("themeBtn");
+  const themeIcon = document.getElementById("themeIcon");
+  const themeLabel = document.getElementById("themeLabel");
+
+  const isLight = body.classList.contains("light");
+  body.classList.toggle("light", !isLight);
+
+  if (isLight) {
+    body.classList.remove("light");
+    themeIcon.textContent = "🌙";
+    themeLabel.textContent = "Dark";
+  } else {
+    body.classList.add("light");
+    themeIcon.textContent = "🌞";
+    themeLabel.textContent = "Light";
+  }
+}
+</script>
+</body>
+</html>

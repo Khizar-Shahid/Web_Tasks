@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Task 1 - Form Validation</title>
+<style>
+body {
+  font-family: Arial;
+  background: #f4f6f8;
+  display: flex;
+  justify-content: center;
+  padding: 40px;
+}
+form {
+  background: #fff;
+  padding: 25px;
+  width: 100%;
+  max-width: 400px;
+  border-radius: 8px;
+}
+input {
+  width: 100%;
+  padding: 10px;
+  margin-top: 10px;
+  border: 2px solid #ccc;
+  border-radius: 5px;
+}
+input.valid { border-color: green; }
+input.invalid { border-color: red; }
+small { color: red; }
+button {
+  width: 100%;
+  padding: 10px;
+  margin-top: 15px;
+}
+button:disabled {
+  background: #aaa;
+}
+</style>
+</head>
+
+<body>
+<form>
+  <h2>Register</h2>
+
+  <input id="name" placeholder="Name">
+  <small id="nameErr"></small>
+
+  <input id="email" placeholder="Email">
+  <small id="emailErr"></small>
+
+  <input type="password" id="pass" placeholder="Password">
+  <small id="passErr"></small>
+
+  <input type="password" id="cpass" placeholder="Confirm Password">
+  <small id="cpassErr"></small>
+
+  <input id="age" placeholder="Age">
+  <small id="ageErr"></small>
+
+  <button id="submit" disabled>Submit</button>
+</form>
+
+<script>
+const nameI = document.getElementById("name");
+const emailI = document.getElementById("email");
+const passI = document.getElementById("pass");
+const cpassI = document.getElementById("cpass");
+const ageI = document.getElementById("age");
+const btn = document.getElementById("submit");
+
+function validate() {
+  let valid = true;
+
+  if (nameI.value.length >= 3) nameI.className="valid";
+  else { nameI.className="invalid"; valid=false; }
+
+  if (emailI.value.includes("@") && emailI.value.includes(".")) emailI.className="valid";
+  else { emailI.className="invalid"; valid=false; }
+
+  if (passI.value.length >= 6 && /\d/.test(passI.value)) passI.className="valid";
+  else { passI.className="invalid"; valid=false; }
+
+  if (cpassI.value === passI.value && cpassI.value !== "") cpassI.className="valid";
+  else { cpassI.className="invalid"; valid=false; }
+
+  if (ageI.value >= 18 && ageI.value <= 60) ageI.className="valid";
+  else { ageI.className="invalid"; valid=false; }
+
+  btn.disabled = !valid;
+}
+
+document.querySelectorAll("input").forEach(i =>
+  i.addEventListener("input", validate)
+);
+</script>
+</body>
+</html>

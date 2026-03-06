@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Task 2 - Profile Card</title>
+<style>
+body {
+  margin: 0;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: Arial, sans-serif;
+  background: linear-gradient(135deg, #4f46e5, #9333ea);
+}
+
+.card {
+  width: 320px;
+  padding: 24px;
+  border-radius: 18px;
+  background: #0f172a;
+  color: #e5e7eb;
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.7);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  backdrop-filter: blur(14px);
+  transition: transform 0.3s ease, box-shadow 0.3s ease, translate 0.3s ease;
+}
+
+.card::before {
+  content: "";
+  position: absolute;
+  inset: -40%;
+  background: radial-gradient(circle at top, rgba(96, 165, 250, 0.4), transparent 60%);
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+.card:hover {
+  transform: translateY(-6px) scale(1.03);
+  box-shadow: 0 25px 60px rgba(15, 23, 42, 0.95);
+}
+
+.avatar-wrap {
+  position: relative;
+  display: inline-block;
+  margin-bottom: 12px;
+}
+
+.avatar-ring {
+  width: 112px;
+  height: 112px;
+  border-radius: 50%;
+  padding: 3px;
+  background: conic-gradient(from 140deg, #38bdf8, #6366f1, #a855f7, #ec4899, #38bdf8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.avatar {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #020617;
+}
+
+h3 {
+  margin: 8px 0 2px;
+  font-size: 1.4rem;
+  letter-spacing: 0.03em;
+}
+
+.tagline {
+  margin: 0 0 14px;
+  font-size: 0.9rem;
+  color: #9ca3af;
+}
+
+.meta {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  font-size: 0.8rem;
+  color: #cbd5f5;
+  margin-bottom: 14px;
+}
+
+.badge {
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(37, 99, 235, 0.18);
+  border: 1px solid rgba(129, 140, 248, 0.6);
+}
+
+.badge.secondary {
+  background: rgba(30, 64, 175, 0.35);
+  border-color: rgba(96, 165, 250, 0.7);
+}
+
+.divider {
+  height: 1px;
+  background: radial-gradient(circle, rgba(148, 163, 184, 0.7), transparent 70%);
+  margin: 10px 0 14px;
+}
+
+.extra {
+  display: none;
+  text-align: left;
+  font-size: 0.85rem;
+  color: #e5e7eb;
+}
+
+.extra p {
+  margin: 4px 0;
+}
+
+.label {
+  font-weight: 600;
+  color: #a5b4fc;
+}
+
+button {
+  margin-top: 16px;
+  padding: 10px 18px;
+  border-radius: 999px;
+  border: none;
+  background: linear-gradient(135deg, #4f46e5, #8b5cf6);
+  color: #f9fafb;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  box-shadow: 0 10px 25px rgba(88, 80, 236, 0.7);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+}
+
+button:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.05);
+  box-shadow: 0 14px 30px rgba(88, 80, 236, 0.9);
+}
+
+button:active {
+  transform: translateY(1px) scale(0.98);
+  box-shadow: 0 6px 16px rgba(55, 65, 81, 0.9);
+}
+</style>
+</head>
+
+<body>
+<div class="card">
+  <div class="avatar-wrap">
+    <div class="avatar-ring">
+      <img class="avatar" src="https://via.placeholder.com/100" alt="Profile picture of Ali Ahmed">
+    </div>
+  </div>
+
+  <h3>Ali Ahmed</h3>
+  <p class="tagline">Aspiring Full‑Stack Developer</p>
+
+  <div class="meta">
+    <span class="badge">Reg#: 2023-CS-101</span>
+    <span class="badge secondary">Computer Science</span>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="extra" id="more">
+    <p><span class="label">Hobbies:</span> Coding, Reading</p>
+    <p><span class="label">Skills:</span> HTML, CSS, JS</p>
+    <p><span class="label">Email:</span> ali@email.com</p>
+  </div>
+
+  <button onclick="toggle()">Show More</button>
+</div>
+
+<script>
+function toggle() {
+  const more = document.getElementById("more");
+  const btn = event.target;
+  if (more.style.display === "none") {
+    more.style.display = "block";
+    btn.innerText = "Show Less";
+  } else {
+    more.style.display = "none";
+    btn.innerText = "Show More";
+  }
+}
+</script>
+</body>
+</html>
