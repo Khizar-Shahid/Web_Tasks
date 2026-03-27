@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Task 2 - Interactive Quiz</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', sans-serif; background: #1a1a2e; color: #eee; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+  h1 { font-size: 28px; margin-bottom: 30px; color: #e94560; letter-spacing: 1px; }
+  .quiz-box { background: #16213e; border-radius: 14px; padding: 36px; width: 100%; max-width: 580px; box-shadow: 0 8px 32px rgba(0,0,0,0.4); }
+  .progress-bar-wrap { background: #0f3460; border-radius: 10px; height: 10px; margin-bottom: 24px; overflow: hidden; }
+  .progress-bar { height: 10px; background: linear-gradient(90deg, #e94560, #f5a623); border-radius: 10px; transition: width 0.4s ease; }
+  .progress-label { font-size: 12px; color: #aaa; margin-bottom: 8px; }
+  .question-num { font-size: 13px; color: #e94560; font-weight: 600; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
+  .question-text { font-size: 20px; font-weight: 600; margin-bottom: 24px; line-height: 1.4; }
+  .options { display: flex; flex-direction: column; gap: 12px; }
+  .option-btn { padding: 14px 18px; border: 2px solid #0f3460; background: #0f3460; color: #eee; border-radius: 10px; cursor: pointer; font-size: 15px; text-align: left; transition: all 0.2s; }
+  .option-btn:hover { border-color: #e94560; background: #1a1a2e; }
+  .option-btn.selected { border-color: #e94560; background: rgba(233,69,96,0.2); }
+  .nav-btns { display: flex; justify-content: space-between; margin-top: 28px; gap: 12px; }
+  .nav-btns button { padding: 12px 28px; border: none; border-radius: 8px; cursor: pointer; font-size: 15px; font-weight: 600; transition: opacity 0.2s; }
+  #prevBtn { background: #0f3460; color: #eee; }
+  #nextBtn { background: #e94560; color: #fff; }
+  #nextBtn:hover, #prevBtn:hover { opacity: 0.85; }
+
+  /* Scoreboard */
+  #scoreboard { display: none; width: 100%; max-width: 700px; }
+  .score-summary { text-align: center; margin-bottom: 28px; }
+  .score-summary .score-num { font-size: 52px; font-weight: 700; color: #e94560; }
+  .score-summary p { font-size: 16px; color: #aaa; margin-top: 4px; }
+  table { width: 100%; border-collapse: collapse; border-radius: 10px; overflow: hidden; }
+  th { background: #e94560; padding: 12px 14px; text-align: left; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; }
+  td { padding: 12px 14px; font-size: 14px; border-bottom: 1px solid #0f3460; background: #16213e; }
+  tr.correct td { background: rgba(39, 174, 96, 0.15); }
+  tr.wrong td { background: rgba(233, 69, 96, 0.12); }
+  .badge { display: inline-block; padding: 2px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+  .badge.c { background: #27ae60; color: #fff; }
+  .badge.w { background: #e94560; color: #fff; }
+  #retryBtn { display: block; margin: 24px auto 0; padding: 12px 36px; background: #e94560; color: #fff; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; font-weight: 600; }
+  #retryBtn:hover { opacity: 0.85; }
+</style>
+</head>
+<body>
+
+<h1>Knowledge Quiz</h1>
+
+<div class="quiz-box" id="quizBox">
+  <div class="progress-label" id="progressLabel">Question 1 of 6</div>
+  <div class="progress-bar-wrap"><div class="progress-bar" id="progressBar" style="width:0%"></div></div>
+  <div class="question-num" id="questionNum">Q1</div>
+  <div class="question-text" id="questionText"></div>
+  <div class="options" id="optionsContainer"></div>
+  <div class="nav-btns">
+    <button id="prevBtn" onclick="navigate(-1)">&#8592; Prev</button>
+    <button id="nextBtn" onclick="navigate(1)">Next &#8594;</button>
+  </div>
+</div>
+
+<div id="scoreboard">
+  <div class="score-summary">
+    <div class="score-num" id="scoreNum"></div>
+    <p id="scoreText"></p>
+  </div>
+  <table>
+    <thead><tr><th>#</th><th>Question</th><th>Your Answer</th><th>Correct Answer</th><th>Mark</th></tr></thead>
+    <tbody id="scoreTable"></tbody>
+  </table>
+  <button id="retryBtn" onclick="retryQuiz()">Try Again</button>
+</div>
+
+<script>
+  const questions = [
+    { q: "Capital of France?", options: ["Paris", "London", "Rome", "Berlin"], answer: "Paris" },
+    { q: "2 + 2 * 2 = ?", options: ["8", "6", "4", "12"], answer: "6" },
+    { q: "JS full form?", options: ["JavaScript", "Java", "JScript", "JS"], answer: "JavaScript" },
+    { q: "Earth's shape is?", options: ["Square", "Flat", "Round", "Triangle"], answer: "Round" },
+    { q: "HTML stands for?", options: ["Hyper Text", "High Text", "Hot Text", "Head Text"], answer: "Hyper Text" },
+    { q: "Which is NOT a JS data type?", options: ["String", "Float", "Boolean", "Number"], answer: "Float" },
+  ];
+
+  let current = 0;
+  let selected = new Array(questions.length).fill(null);
+
+  function render() {
+    const q = questions[current];
+    document.getElementById("questionNum").textContent = "Q" + (current + 1);
+    document.getElementById("questionText").textContent = q.q;
+    document.getElementById("progressLabel").textContent = `Question ${current + 1} of ${questions.length}`;
+    document.getElementById("progressBar").style.width = ((current + 1) / questions.length * 100) + "%";
+
+    const container = document.getElementById("optionsContainer");
+    container.innerHTML = "";
+    q.options.forEach(opt => {
+      const btn = document.createElement("button");
+      btn.className = "option-btn" + (selected[current] === opt ? " selected" : "");
+      btn.textContent = opt;
+      btn.addEventListener("click", () => {
+        selected[current] = opt;
+        document.querySelectorAll(".option-btn").forEach(b => b.classList.remove("selected"));
+        btn.classList.add("selected");
+      });
+      container.appendChild(btn);
+    });
+
+    document.getElementById("prevBtn").style.visibility = current === 0 ? "hidden" : "visible";
+    document.getElementById("nextBtn").textContent = current === questions.length - 1 ? "Submit ✓" : "Next →";
+  }
+
+  function navigate(dir) {
+    if (dir === 1 && current === questions.length - 1) { showScoreboard(); return; }
+    current = Math.max(0, Math.min(questions.length - 1, current + dir));
+    render();
+  }
+
+  function showScoreboard() {
+    let score = 0;
+    const tbody = document.getElementById("scoreTable");
+    tbody.innerHTML = "";
+    questions.forEach((q, i) => {
+      const correct = selected[i] === q.answer;
+      if (correct) score++;
+      const row = document.createElement("tr");
+      row.className = correct ? "correct" : "wrong";
+      row.innerHTML = `
+        <td>${i + 1}</td>
+        <td>${q.q}</td>
+        <td>${selected[i] || "<em>—</em>"}</td>
+        <td>${q.answer}</td>
+        <td><span class="badge ${correct ? 'c' : 'w'}">${correct ? '1' : '0'}</span></td>`;
+      tbody.appendChild(row);
+    });
+    document.getElementById("scoreNum").textContent = `${score} / ${questions.length}`;
+    document.getElementById("scoreText").textContent = score >= 4 ? "Well done! 🎉" : "Keep practicing! 💪";
+    document.getElementById("quizBox").style.display = "none";
+    document.getElementById("scoreboard").style.display = "block";
+  }
+
+  function retryQuiz() {
+    current = 0;
+    selected = new Array(questions.length).fill(null);
+    document.getElementById("quizBox").style.display = "block";
+    document.getElementById("scoreboard").style.display = "none";
+    render();
+  }
+
+  render();
+</script>
+</body>
+</html>

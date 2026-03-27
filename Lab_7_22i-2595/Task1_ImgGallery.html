@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Task 1 - Image Gallery</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: Georgia, serif; background: #f5f0eb; color: #2c2c2c; }
+  header { background: #2c2c2c; color: #f5f0eb; padding: 24px 40px; }
+  header h1 { font-size: 28px; font-weight: normal; letter-spacing: 2px; }
+  .add-form { display: flex; gap: 10px; padding: 20px 40px; background: #e8e0d5; flex-wrap: wrap; }
+  .add-form input, .add-form select { padding: 8px 12px; border: 1px solid #bbb; background: #fff; font-size: 14px; border-radius: 4px; }
+  .add-form input { flex: 1; min-width: 140px; }
+  .add-form button { padding: 8px 20px; background: #2c2c2c; color: #fff; border: none; cursor: pointer; border-radius: 4px; font-size: 14px; }
+  .add-form button:hover { background: #555; }
+  .filters { display: flex; gap: 10px; padding: 20px 40px; flex-wrap: wrap; }
+  .filter-btn { padding: 8px 20px; border: 2px solid #2c2c2c; background: transparent; cursor: pointer; font-size: 14px; border-radius: 30px; transition: all 0.2s; }
+  .filter-btn.active, .filter-btn:hover { background: #2c2c2c; color: #fff; }
+  .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; padding: 20px 40px 40px; }
+  .gallery-item { background: #fff; border-radius: 8px; overflow: hidden; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: transform 0.2s, box-shadow 0.2s; animation: fadeIn 0.4s ease; }
+  .gallery-item:hover { transform: translateY(-4px); box-shadow: 0 8px 20px rgba(0,0,0,0.15); }
+  .gallery-item img { width: 100%; height: 180px; object-fit: cover; display: block; }
+  .gallery-item .info { padding: 12px; }
+  .gallery-item .info h3 { font-size: 15px; font-weight: bold; }
+  .gallery-item .info span { font-size: 12px; color: #888; background: #f0f0f0; padding: 2px 8px; border-radius: 10px; display: inline-block; margin-top: 4px; }
+  .gallery-item.hidden { display: none; }
+  @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+
+  /* Modal */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 1000; align-items: center; justify-content: center; animation: overlayIn 0.25s ease; }
+  .modal-overlay.open { display: flex; }
+  @keyframes overlayIn { from { opacity: 0; } to { opacity: 1; } }
+  .modal { background: #fff; border-radius: 10px; max-width: 600px; width: 90%; overflow: hidden; animation: modalIn 0.3s cubic-bezier(0.34,1.56,0.64,1); }
+  @keyframes modalIn { from { opacity: 0; transform: scale(0.85) translateY(30px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+  .modal img { width: 100%; max-height: 380px; object-fit: cover; }
+  .modal .modal-body { padding: 20px 24px; }
+  .modal .modal-body h2 { font-size: 22px; margin-bottom: 6px; }
+  .modal .modal-body p { font-size: 14px; color: #555; margin-bottom: 6px; }
+  .modal .modal-body .cat-badge { font-size: 12px; background: #2c2c2c; color: #fff; padding: 3px 10px; border-radius: 20px; }
+  .modal-close { float: right; background: none; border: none; font-size: 26px; cursor: pointer; color: #666; margin-top: -4px; }
+  .modal-close:hover { color: #000; }
+</style>
+</head>
+<body>
+
+<header><h1>Dynamic Image Gallery</h1></header>
+
+<div class="add-form">
+  <input type="text" id="imgUrl" placeholder="Image URL">
+  <input type="text" id="imgTitle" placeholder="Title">
+  <input type="text" id="imgDesc" placeholder="Description">
+  <select id="imgCategory">
+    <option value="Nature">Nature</option>
+    <option value="Architecture">Architecture</option>
+    <option value="Animals">Animals</option>
+  </select>
+  <button onclick="addImage()">Add Image</button>
+</div>
+
+<div class="filters" id="filters"></div>
+<div class="gallery" id="gallery"></div>
+
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal" id="modal">
+    <img id="modalImg" src="" alt="">
+    <div class="modal-body">
+      <button class="modal-close" onclick="closeModal()">&#x2715;</button>
+      <h2 id="modalTitle"></h2>
+      <p id="modalDesc"></p>
+      <span class="cat-badge" id="modalCat"></span>
+    </div>
+  </div>
+</div>
+
+<script>
+  const images = [
+    { imageURL: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600", title: "Mountain", description: "A majestic snow-capped mountain at sunrise.", category: "Nature" },
+    { imageURL: "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=600", title: "Bridge", description: "An iconic suspension bridge over the bay.", category: "Architecture" },
+    { imageURL: "https://images.unsplash.com/photo-1546182990-dffeafbe841d?w=600", title: "Lion", description: "A powerful lion resting in the savanna.", category: "Animals" },
+    { imageURL: "https://images.unsplash.com/photo-1448375240586-882707db888b?w=600", title: "Forest", description: "A mystical forest shrouded in morning mist.", category: "Nature" },
+    { imageURL: "https://images.unsplash.com/photo-1486325212027-8081e485255e?w=600", title: "Skyscraper", description: "Towering glass skyscrapers in a modern city.", category: "Architecture" },
+    { imageURL: "https://images.unsplash.com/photo-1474511320723-9a56873867b5?w=600", title: "Fox", description: "A curious fox in the wild.", category: "Animals" },
+  ];
+
+  const categories = ["All", "Nature", "Architecture", "Animals"];
+  let activeFilter = "All";
+
+  function renderFilters() {
+    const filtersEl = document.getElementById("filters");
+    filtersEl.innerHTML = "";
+    categories.forEach(cat => {
+      const btn = document.createElement("button");
+      btn.className = "filter-btn" + (cat === activeFilter ? " active" : "");
+      btn.textContent = cat;
+      btn.dataset.cat = cat;
+      btn.addEventListener("click", () => { activeFilter = cat; renderFilters(); filterGallery(); });
+      filtersEl.appendChild(btn);
+    });
+  }
+
+  function filterGallery() {
+    document.querySelectorAll(".gallery-item").forEach(item => {
+      const show = activeFilter === "All" || item.dataset.category === activeFilter;
+      item.classList.toggle("hidden", !show);
+    });
+  }
+
+  function createGalleryItem(img) {
+    const div = document.createElement("div");
+    div.className = "gallery-item";
+    div.dataset.category = img.category;
+    div.innerHTML = `
+      <img src="${img.imageURL}" alt="${img.title}" onerror="this.src='https://via.placeholder.com/300x180?text=Image'">
+      <div class="info"><h3>${img.title}</h3><span>${img.category}</span></div>`;
+    div.addEventListener("click", () => openModal(img));
+    return div;
+  }
+
+  function renderGallery() {
+    const gallery = document.getElementById("gallery");
+    gallery.innerHTML = "";
+    images.forEach(img => gallery.appendChild(createGalleryItem(img)));
+    filterGallery();
+  }
+
+  function addImage() {
+    const url = document.getElementById("imgUrl").value.trim();
+    const title = document.getElementById("imgTitle").value.trim();
+    const desc = document.getElementById("imgDesc").value.trim();
+    const category = document.getElementById("imgCategory").value;
+    if (!url || !title) { alert("Please provide at least a URL and title."); return; }
+    images.push({ imageURL: url, title, description: desc || "-", category });
+    renderGallery();
+    document.getElementById("imgUrl").value = "";
+    document.getElementById("imgTitle").value = "";
+    document.getElementById("imgDesc").value = "";
+  }
+
+  function openModal(img) {
+    document.getElementById("modalImg").src = img.imageURL;
+    document.getElementById("modalTitle").textContent = img.title;
+    document.getElementById("modalDesc").textContent = img.description;
+    document.getElementById("modalCat").textContent = img.category;
+    document.getElementById("modalOverlay").classList.add("open");
+  }
+
+  function closeModal(e) {
+    if (!e || e.target === document.getElementById("modalOverlay") || e.currentTarget.classList.contains("modal-close")) {
+      document.getElementById("modalOverlay").classList.remove("open");
+    }
+  }
+
+  renderFilters();
+  renderGallery();
+</script>
+</body>
+</html>

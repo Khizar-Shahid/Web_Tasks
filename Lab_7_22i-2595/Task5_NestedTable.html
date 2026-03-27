@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Task 5 - Nested Student Table</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', sans-serif; background: #f1f3f5; padding: 36px 20px; }
+  h1 { font-size: 24px; color: #212529; margin-bottom: 20px; }
+  .search-bar { margin-bottom: 18px; }
+  .search-bar input { padding: 10px 14px; width: 100%; max-width: 360px; border: 1.5px solid #ced4da; border-radius: 8px; font-size: 14px; }
+  table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.08); }
+  thead th { background: #343a40; color: #fff; padding: 14px 16px; text-align: left; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; user-select: none; }
+  thead th:hover { background: #495057; }
+  thead th .arrow { margin-left: 6px; font-size: 11px; color: #adb5bd; }
+  .student-row td { padding: 13px 16px; font-size: 14px; font-weight: 600; color: #212529; border-bottom: 1px solid #dee2e6; background: #f8f9fa; cursor: pointer; }
+  .student-row td:first-child { display: flex; align-items: center; gap: 8px; }
+  .toggle-icon { font-size: 11px; color: #6c757d; width: 14px; display: inline-block; }
+  .course-row td { padding: 10px 16px 10px 48px; font-size: 13px; color: #495057; border-bottom: 1px solid #f1f3f5; background: #fff; }
+  .course-row.hidden { display: none; }
+  .course-row.low-score td { background: #fff5f5; color: #c0392b; }
+  .score-cell { font-weight: 600; }
+  .low-score .score-cell { color: #e74c3c; }
+  .no-results { text-align: center; padding: 30px; color: #868e96; font-size: 15px; }
+</style>
+</head>
+<body>
+
+<h1>Students Table</h1>
+<div class="search-bar">
+  <input type="text" id="searchInput" placeholder="Search by name or course..." oninput="renderTable()">
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th onclick="sortBy('name')">Student Name <span class="arrow" id="arr-name">↕</span></th>
+      <th onclick="sortBy('course')">Course <span class="arrow" id="arr-course">↕</span></th>
+      <th onclick="sortBy('score')">Score <span class="arrow" id="arr-score">↕</span></th>
+    </tr>
+  </thead>
+  <tbody id="tableBody"></tbody>
+</table>
+
+<script>
+  const students = [
+    { name: "Alice", courses: [{ course: "Math", score: 85 }, { course: "Physics", score: 42 }] },
+    { name: "Bob", courses: [{ course: "Chemistry", score: 70 }, { course: "Biology", score: 55 }] },
+    { name: "Charlie", courses: [{ course: "History", score: 30 }, { course: "English", score: 90 }] },
+    { name: "Diana", courses: [{ course: "Math", score: 95 }, { course: "Computer Science", score: 88 }] },
+    { name: "Ethan", courses: [{ course: "Physics", score: 45 }, { course: "Chemistry", score: 38 }] },
+  ];
+
+  let sortKey = null;
+  let sortDir = 1;
+  let expanded = {};
+
+  function sortBy(key) {
+    if (sortKey === key) sortDir *= -1;
+    else { sortKey = key; sortDir = 1; }
+    ["name", "course", "score"].forEach(k => {
+      document.getElementById("arr-" + k).textContent = "↕";
+    });
+    document.getElementById("arr-" + key).textContent = sortDir === 1 ? "↑" : "↓";
+    renderTable();
+  }
+
+  function renderTable() {
+    const query = document.getElementById("searchInput").value.toLowerCase().trim();
+    const tbody = document.getElementById("tableBody");
+    tbody.innerHTML = "";
+
+    let data = students.map(s => ({
+      ...s,
+      courses: s.courses.filter(c =>
+        !query || s.name.toLowerCase().includes(query) || c.course.toLowerCase().includes(query)
+      )
+    })).filter(s => s.courses.length > 0 || s.name.toLowerCase().includes(query));
+
+    // Sorting
+    if (sortKey === "name") {
+      data.sort((a, b) => a.name.localeCompare(b.name) * sortDir);
+    } else if (sortKey === "course") {
+      data.sort((a, b) => (a.courses[0]?.course || "").localeCompare(b.courses[0]?.course || "") * sortDir);
+    } else if (sortKey === "score") {
+      data.sort((a, b) => ((a.courses[0]?.score || 0) - (b.courses[0]?.score || 0)) * sortDir);
+    }
+
+    if (data.length === 0) {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `<td colspan="3" class="no-results">No students found.</td>`;
+      tbody.appendChild(tr);
+      return;
+    }
+
+    data.forEach(student => {
+      const isOpen = !!expanded[student.name];
+
+      // Student row
+      const sRow = document.createElement("tr");
+      sRow.className = "student-row";
+      sRow.innerHTML = `
+        <td><span class="toggle-icon">${isOpen ? "▼" : "▶"}</span>${student.name}</td>
+        <td></td><td></td>`;
+      sRow.addEventListener("click", () => {
+        expanded[student.name] = !expanded[student.name];
+        renderTable();
+      });
+      tbody.appendChild(sRow);
+
+      // Course rows
+      student.courses.forEach(c => {
+        const cRow = document.createElement("tr");
+        cRow.className = "course-row" + (c.score < 50 ? " low-score" : "") + (isOpen ? "" : " hidden");
+        cRow.innerHTML = `<td></td><td>${c.course}</td><td class="score-cell">${c.score}</td>`;
+        tbody.appendChild(cRow);
+      });
+    });
+  }
+
+  renderTable();
+</script>
+</body>
+</html>

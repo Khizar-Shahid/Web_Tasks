@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Task 3 - Kanban Board</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; min-height: 100vh; padding: 30px 20px; }
+  h1 { font-size: 26px; font-weight: 700; color: #1a1a2e; margin-bottom: 20px; }
+  .add-bar { display: flex; gap: 10px; margin-bottom: 28px; flex-wrap: wrap; }
+  .add-bar input { flex: 1; min-width: 160px; padding: 10px 14px; border: 1.5px solid #ccc; border-radius: 8px; font-size: 14px; }
+  .add-bar select { padding: 10px 14px; border: 1.5px solid #ccc; border-radius: 8px; font-size: 14px; background: #fff; }
+  .add-bar button { padding: 10px 22px; background: #4f46e5; color: #fff; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; }
+  .add-bar button:hover { background: #4338ca; }
+  .board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .column { background: #e5e7eb; border-radius: 12px; padding: 14px; min-height: 400px; }
+  .column h2 { font-size: 14px; font-weight: 700; color: #374151; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 2px solid #d1d5db; }
+  .column.drag-over { background: #dbeafe; border: 2px dashed #4f46e5; }
+  .task-list { min-height: 60px; display: flex; flex-direction: column; gap: 10px; }
+  .task-card { background: #fff; border-radius: 10px; padding: 12px 14px; cursor: grab; box-shadow: 0 1px 4px rgba(0,0,0,0.08); border-left: 4px solid #ccc; transition: box-shadow 0.2s, transform 0.15s; user-select: none; }
+  .task-card:active { cursor: grabbing; }
+  .task-card.dragging { opacity: 0.5; transform: scale(0.97); }
+  .task-card.low { border-left-color: #10b981; }
+  .task-card.medium { border-left-color: #f59e0b; }
+  .task-card.high { border-left-color: #ef4444; }
+  .task-top { display: flex; justify-content: space-between; align-items: flex-start; }
+  .task-title { font-size: 14px; font-weight: 600; color: #1f2937; flex: 1; }
+  .del-btn { background: none; border: none; color: #9ca3af; cursor: pointer; font-size: 16px; line-height: 1; padding: 0 0 0 8px; }
+  .del-btn:hover { color: #ef4444; }
+  .priority-badge { font-size: 11px; font-weight: 600; padding: 2px 9px; border-radius: 12px; margin-top: 6px; display: inline-block; text-transform: capitalize; }
+  .priority-badge.low { background: #d1fae5; color: #065f46; }
+  .priority-badge.medium { background: #fef3c7; color: #92400e; }
+  .priority-badge.high { background: #fee2e2; color: #991b1b; }
+  @media(max-width: 600px) { .board { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<h1>Kanban Board</h1>
+
+<div class="add-bar">
+  <input type="text" id="taskInput" placeholder="Enter task name...">
+  <select id="prioritySelect">
+    <option value="low">Low</option>
+    <option value="medium" selected>Medium</option>
+    <option value="high">High</option>
+  </select>
+  <button onclick="addTask()">Add Task</button>
+</div>
+
+<div class="board">
+  <div class="column" id="todo" ondragover="onDragOver(event)" ondrop="onDrop(event, 'todo')" ondragleave="onDragLeave(event)">
+    <h2>To-Do</h2>
+    <div class="task-list" id="list-todo"></div>
+  </div>
+  <div class="column" id="inprogress" ondragover="onDragOver(event)" ondrop="onDrop(event, 'inprogress')" ondragleave="onDragLeave(event)">
+    <h2>In Progress</h2>
+    <div class="task-list" id="list-inprogress"></div>
+  </div>
+  <div class="column" id="done" ondragover="onDragOver(event)" ondrop="onDrop(event, 'done')" ondragleave="onDragLeave(event)">
+    <h2>Done</h2>
+    <div class="task-list" id="list-done"></div>
+  </div>
+</div>
+
+<script>
+  let tasks = JSON.parse(localStorage.getItem("kanban_tasks") || "[]");
+  let draggingId = null;
+
+  function saveTasks() { localStorage.setItem("kanban_tasks", JSON.stringify(tasks)); }
+
+  function createCard(task) {
+    const card = document.createElement("div");
+    card.className = `task-card ${task.priority}`;
+    card.draggable = true;
+    card.dataset.id = task.id;
+    card.innerHTML = `
+      <div class="task-top">
+        <span class="task-title">${task.title}</span>
+        <button class="del-btn" onclick="deleteTask('${task.id}')">&#x2715;</button>
+      </div>
+      <span class="priority-badge ${task.priority}">${task.priority}</span>`;
+    card.addEventListener("dragstart", e => {
+      draggingId = task.id;
+      setTimeout(() => card.classList.add("dragging"), 0);
+    });
+    card.addEventListener("dragend", () => card.classList.remove("dragging"));
+    return card;
+  }
+
+  function renderBoard() {
+    ["todo", "inprogress", "done"].forEach(col => {
+      const list = document.getElementById("list-" + col);
+      list.innerHTML = "";
+      tasks.filter(t => t.column === col).forEach(t => list.appendChild(createCard(t)));
+    });
+  }
+
+  function addTask() {
+    const title = document.getElementById("taskInput").value.trim();
+    if (!title) { alert("Enter a task name."); return; }
+    const priority = document.getElementById("prioritySelect").value;
+    tasks.push({ id: Date.now().toString(), title, priority, column: "todo" });
+    saveTasks();
+    renderBoard();
+    document.getElementById("taskInput").value = "";
+  }
+
+  function deleteTask(id) {
+    tasks = tasks.filter(t => t.id !== id);
+    saveTasks();
+    renderBoard();
+  }
+
+  function onDragOver(e) {
+    e.preventDefault();
+    e.currentTarget.classList.add("drag-over");
+  }
+
+  function onDragLeave(e) { e.currentTarget.classList.remove("drag-over"); }
+
+  function onDrop(e, col) {
+    e.preventDefault();
+    e.currentTarget.classList.remove("drag-over");
+    if (!draggingId) return;
+    const task = tasks.find(t => t.id === draggingId);
+    if (task) { task.column = col; saveTasks(); renderBoard(); }
+    draggingId = null;
+  }
+
+  renderBoard();
+</script>
+</body>
+</html>

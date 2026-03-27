@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Task 4 - Dynamic Table Generator</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', sans-serif; background: #f8f9fa; padding: 40px 20px; }
+  h1 { font-size: 24px; color: #212529; margin-bottom: 24px; }
+  .controls { display: flex; align-items: center; gap: 12px; margin-bottom: 28px; flex-wrap: wrap; }
+  .controls label { font-size: 14px; color: #495057; display: flex; align-items: center; gap: 8px; }
+  .controls input[type=number] { width: 70px; padding: 8px 10px; border: 1.5px solid #ced4da; border-radius: 6px; font-size: 14px; }
+  .controls button { padding: 9px 22px; background: #0d6efd; color: #fff; border: none; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; }
+  .controls button:hover { background: #0b5ed7; }
+  #error { color: #dc3545; font-size: 13px; margin-bottom: 10px; min-height: 18px; }
+  #tableWrap { overflow-x: auto; }
+  table { border-collapse: collapse; min-width: 100%; }
+  td { padding: 12px 20px; border: 1px solid #dee2e6; text-align: center; font-size: 14px; color: #212529; cursor: pointer; transition: background 0.15s; }
+  tr.alt-row td { background: #e9ecef; }
+  tr:not(.alt-row) td { background: #ffffff; }
+</style>
+</head>
+<body>
+
+<h1>Dynamic Table Generator</h1>
+
+<div class="controls">
+  <label>Rows: <input type="number" id="rowsInput" min="1" max="20" value="4"></label>
+  <label>Columns: <input type="number" id="colsInput" min="1" max="10" value="3"></label>
+  <button onclick="generateTable()">Generate Table</button>
+</div>
+<div id="error"></div>
+<div id="tableWrap"></div>
+
+<script>
+  function generateTable() {
+    const errorEl = document.getElementById("error");
+    const wrap = document.getElementById("tableWrap");
+    const rows = parseInt(document.getElementById("rowsInput").value);
+    const cols = parseInt(document.getElementById("colsInput").value);
+
+    if (isNaN(rows) || isNaN(cols) || rows < 1 || cols < 1) {
+      errorEl.textContent = "Please enter positive numbers for rows and columns."; return;
+    }
+    if (rows > 20 || cols > 10) {
+      errorEl.textContent = "Max allowed: 20 rows and 10 columns."; return;
+    }
+    errorEl.textContent = "";
+
+    // Clear previous table
+    wrap.innerHTML = "";
+
+    const table = document.createElement("table");
+
+    for (let r = 1; r <= rows; r++) {
+      const tr = document.createElement("tr");
+      if (r % 2 === 0) tr.classList.add("alt-row");
+
+      for (let c = 1; c <= cols; c++) {
+        const td = document.createElement("td");
+        td.textContent = `(${r}, ${c})`;
+
+        // Hover effects via JavaScript only
+        td.addEventListener("mouseover", function() {
+          this.style.background = "#0d6efd";
+          this.style.color = "#fff";
+          this.style.transform = "scale(1.05)";
+        });
+        td.addEventListener("mouseout", function() {
+          this.style.background = "";
+          this.style.color = "";
+          this.style.transform = "";
+        });
+
+        tr.appendChild(td);
+      }
+      table.appendChild(tr);
+    }
+
+    wrap.appendChild(table);
+  }
+
+  // Generate default table on load
+  generateTable();
+</script>
+</body>
+</html>
